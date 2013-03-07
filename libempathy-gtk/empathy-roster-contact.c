@@ -218,11 +218,6 @@ update_presence_msg (EmpathyRosterContact *self)
 
       gtk_widget_show (self->priv->presence_msg);
     }
-
-  types = (GStrv) empathy_individual_get_client_types (self->priv->individual);
-
-  gtk_widget_set_visible (self->priv->phone_icon,
-      empathy_client_types_contains_mobile_device (types));
 }
 
 static void
@@ -295,6 +290,25 @@ presence_status_changed_cb (FolksIndividual *individual,
 }
 
 static void
+update_phone_icon(EmpathyRosterContact *self)
+{
+  GStrv types;  
+
+  types = (GStrv) empathy_individual_get_client_types (self->priv->individual);
+  gtk_widget_set_visible (self->priv->phone_icon,
+      empathy_client_types_contains_mobile_device (types));
+}
+
+static void
+presence_type_changed_cb (FolksIndividual *individual,
+    GParamSpec *spec,
+    EmpathyRosterContact *self)
+
+{
+  update_phone_icon(self);
+}
+
+static void
 empathy_roster_contact_constructed (GObject *object)
 {
   EmpathyRosterContact *self = EMPATHY_ROSTER_CONTACT (object);
@@ -315,9 +329,12 @@ empathy_roster_contact_constructed (GObject *object)
       G_CALLBACK (presence_message_changed_cb), self, 0);
   tp_g_signal_connect_object (self->priv->individual, "notify::presence-status",
       G_CALLBACK (presence_status_changed_cb), self, 0);
+  tp_g_signal_connect_object (self->priv->individual, "notify::client-types",
+      G_CALLBACK (presence_type_changed_cb), self, 0);
 
   update_avatar (self);
   update_alias (self);
+  update_phone_icon(self);
   update_presence_msg (self);
   update_presence_icon (self);
 
