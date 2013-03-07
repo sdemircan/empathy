@@ -177,7 +177,6 @@ static void
 update_presence_msg (EmpathyRosterContact *self)
 {
   const gchar *msg;
-  GStrv types;
 
   msg = folks_presence_details_get_presence_message (
       FOLKS_PRESENCE_DETAILS (self->priv->individual));
